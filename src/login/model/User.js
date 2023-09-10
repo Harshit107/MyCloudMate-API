@@ -53,6 +53,12 @@ const userSchema = new mongoose.Schema(
   }
 );
 
+userSchema.virtual('files', {
+  ref : 'FileData',
+  localField : '_id',
+  foreignField : 'userId'
+})
+
 userSchema.methods.toJSON = function () {
     const user = this
     const userObject = user.toObject();
