@@ -1,3 +1,12 @@
-11 - 09 
+============
+13-09
+============
+Created Project Creation
+Get Project
+Delete Project
+
+=============
+  11 - 09 
+=============
 Create FileData, 
 Not connected to any file, databse checks, error check 
