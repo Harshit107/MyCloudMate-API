@@ -2,6 +2,10 @@ const mongoose = require('mongoose');
 
 
 const FileSchema = new mongoose.Schema({
+    projectId: {
+        type: mongoose.Types.ObjectId,
+        required: true
+    },
     userId: {
         type: mongoose.Types.ObjectId,
         required: true,

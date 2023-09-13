@@ -4,9 +4,8 @@ const User = require("../model/User.js");
 const QRCode = require("../model/QRCode.js");
 const validator = require("../Helper/Validator.js");
 const userAuth = require("../auth/UserAuth.js");
-const mongoose = require("mongoose");
 const { v4: uuidv4 } = require("uuid");
-const checkStringMessage = require("../Helper/StringHelper.js");
+const {checkStringMessage} = require("../Helper/StringHelper.js");
 const forgetPasswordTemplate = require("../template/ForgetPasswordTemplate.js");
 const freelyEmail = require("freely-email");
 const {
@@ -39,6 +38,8 @@ const createTemporaryVerificationLink = async (email) => {
   return appVerificationUrl + newVerificationLink._id;
 };
 
+
+
 /* # # # # # # # # # # # # # #  # # # # # # # # # # # # # # # # # # # # # # # # # # # # */
 
 /*                                 Create and Login                              */
@@ -68,6 +69,8 @@ router.post("/create", async (req, res) => {
 
     await newUser.save();
     isUserCreated = true;
+    newUser.ip = req.ip;
+    newUser.lastIP = req.ip
     const token = await newUser.generateToken();
     const userId = newUser._id;
 
@@ -89,6 +92,7 @@ router.post("/create", async (req, res) => {
   }
 });
 
+
 /* -------------------------------------------------------------------------- */
 /*                                 Login User                                 */
 /* -------------------------------------------------------------------------- */
@@ -98,6 +102,8 @@ router.post("/login", async (req, res) => {
     const { email, password } = validator.userValidator(req.body);
 
     const user = await User.findByCredentails(email, password);
+    user.ip = req.ip;
+    user.lastIP = req.ip
     const token = await user.generateToken();
     showSuccessLog("User Logged In Successfully");
     res.status(200).send({
@@ -110,6 +116,8 @@ router.post("/login", async (req, res) => {
     return res.status(400).send({ error: checkStringMessage(error.message) });
   }
 });
+
+
 
 /* -------------------------------------------------------------------------- */
 /*                             Login using QR code                            */
@@ -195,6 +203,7 @@ router.post("/login/qr/validate", async (req, res) => {
     res.status(400).send({ error: error.message });
   }
 });
+
 
 /* -------------------------------------------------------------------------- */
 /*                        ***** Logout Section  ******                        */
@@ -412,6 +421,17 @@ router.get("/profile", userAuth, async (req, res) => {
   try {
     const user = await User.findById(req.user._id);
     res.status(200).send({ message: user });
+  } catch (error) {
+    return res.status(400).send({ error: checkStringMessage(error.message) });
+  }
+});
+
+// get user all token 
+
+router.get("/profile/token", userAuth, async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+    res.status(200).send({ message: user.tokens });
   } catch (error) {
     return res.status(400).send({ error: checkStringMessage(error.message) });
   }

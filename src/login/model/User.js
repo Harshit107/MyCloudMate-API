@@ -3,6 +3,7 @@ const validator = require("validator");
 const bcrypt = require("bcrypt");
 const jwt = require('jsonwebtoken');
 const { isPasswordValid } = require("../Helper/Validator");
+const { convertDateToString } = require("../Helper/StringHelper");
 
 const userSchema = new mongoose.Schema(
   {
@@ -33,7 +34,7 @@ const userSchema = new mongoose.Schema(
     },
     isVerified: {
       type: Boolean,
-      default: false,
+      default: true,
     },
     userImage: {
       type: String,
@@ -45,8 +46,22 @@ const userSchema = new mongoose.Schema(
           required: true,
           type: String,
         },
+        "Login_date": {
+          type: String,
+        },
+        "Last_used": {
+          type: String,
+        },
+        IP: {
+          type: String
+        },
+        lastIP: {
+          type: String
+        },
+
       },
     ],
+
   },
   {
     timestamps: true,
@@ -54,18 +69,18 @@ const userSchema = new mongoose.Schema(
 );
 
 userSchema.virtual('files', {
-  ref : 'FileData',
-  localField : '_id',
-  foreignField : 'userId'
+  ref: 'FileData',
+  localField: '_id',
+  foreignField: 'userId'
 })
 
 userSchema.methods.toJSON = function () {
-    const user = this
-    const userObject = user.toObject();
+  const user = this
+  const userObject = user.toObject();
 
-    delete userObject.password;
-    delete userObject.tokens
-    return userObject
+  delete userObject.password;
+  delete userObject.tokens
+  return userObject
 }
 
 userSchema.pre("save", async function (next) {
@@ -78,9 +93,9 @@ userSchema.pre("save", async function (next) {
 
 userSchema.statics.findByCredentails = async (email, password) => {
   const user = await User.findOne({ email });
-  if (!user) 
+  if (!user)
     throw new Error("Invalid email or password");
-  
+
   const checkPassworMatch = await isPasswordValid(password, user.password);
   if (!checkPassworMatch) {
     throw new Error("Invalid email or password");
@@ -98,9 +113,26 @@ userSchema.methods.generateToken = async function () {
   );
   user.tokens = user.tokens.concat({
     token,
+    "Login_date": convertDateToString(Date.now()),
+    "Last_used " : convertDateToString(Date.now()),
+    IP: user.ip,
+    lastIP: user.lastIP,
   });
   await user.save();
   return token;
+};
+
+userSchema.methods.updateToken = async function (token, lastIP) {
+  const user = this;
+  // console.log(user.tokens);
+  user.tokens.forEach(t => {
+    if (t.token === token) {
+      t["Last_used"] = convertDateToString(Date.now());
+      t.lastIP = lastIP
+    }
+  });
+  await user.save();
+
 };
 
 const User = mongoose.model("User", userSchema);

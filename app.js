@@ -9,9 +9,13 @@ app.use(cors({
 }));
 
 app.use(express.json());
-const userRouter = require('./src/login/router/UserRouter');
 require("./src/database/mongoose");
+
+const userRouter = require('./src/login/router/UserRouter');
+const projectRouter = require('./src/router/ProjectRouter');
+
 app.use("/users",userRouter);
+app.use("/project",projectRouter);
 
 app.get("/checkserver", (req, res) => res.send("<h1>Hey Developer! Server is working fine, Go aHead!</h1>"));
 
