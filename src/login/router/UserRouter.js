@@ -17,6 +17,8 @@ const {
 
 //dev dependencies
 const VerificationLink = require("../model/VerificationLink.js");
+const ProjectList = require("../../modal/ProjectList.js");
+const { default: mongoose } = require("mongoose");
 
 // ===================    Method Area  ======================================
 
@@ -73,7 +75,8 @@ router.post("/create", async (req, res) => {
     newUser.lastIP = req.ip
     const token = await newUser.generateToken();
     const userId = newUser._id;
-
+    const newProject = new ProjectList({projectName : "Default Project", userId : userId});
+    await newProject.save();
     res.status(201).send({
       user: newUser,
       token: token,

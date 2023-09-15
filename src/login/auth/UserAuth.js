@@ -30,12 +30,10 @@ const userAuth = async (req, res, next) => {
 
     if (!user.isVerified)
       return res.status(403).send({ error: "Email is Not Verified" });
-    console.log(req.ip);
+
     if (!req.url.includes('logout')) {
       user.updateToken(token, req.ip)
-
     }
-
     req.user = user;
     req.token = token;
 

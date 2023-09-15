@@ -13,9 +13,11 @@ require("./src/database/mongoose");
 
 const userRouter = require('./src/login/router/UserRouter');
 const projectRouter = require('./src/router/ProjectRouter');
+const fileRouter = require('./src/router/FileRouter');
 
 app.use("/users",userRouter);
 app.use("/project",projectRouter);
+app.use("/file",fileRouter);
 
 app.get("/checkserver", (req, res) => res.send("<h1>Hey Developer! Server is working fine, Go aHead!</h1>"));
 

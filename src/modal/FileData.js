@@ -14,7 +14,7 @@ const FileSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    fileType: {
+    type: {
         type: String,
         required: true,
     },
@@ -30,10 +30,15 @@ const FileSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-
+    isDeleted : {
+        type : Boolean,
+        default : false,
+    }
 }, {
     timestamps: true
 })
+
+
 
 const FileData = mongoose.model('FileData', FileSchema);
 module.exports = FileData;

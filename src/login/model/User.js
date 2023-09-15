@@ -135,5 +135,20 @@ userSchema.methods.updateToken = async function (token, lastIP) {
 
 };
 
+userSchema.set('toJSON', {virtuals : true});
+userSchema.set('toObject', {virtuals : true});
+userSchema.methods.toJSON = function () {
+  const user = this;
+  const userObject = user.toObject();
+  return userObject;
+};
+
+userSchema.virtual('FileData',  {
+  ref : 'FileData',
+  localField : '_id',
+  foreignField : 'userId'
+})
+
+
 const User = mongoose.model("User", userSchema);
 module.exports = User;
