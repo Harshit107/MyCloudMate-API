@@ -13,13 +13,9 @@ router.post('/create', userAuth, async function (req, res) {
     try {
         delete req.body.createdAt;
         delete req.body.updatedAt;
-        const createdFile = new FileData({ ...req.body, userId: req.user._id  });
-        
-        console.log(req.body);
-
+        const createdFile = new FileData({ ...req.body, userId: req.user._id });
         await createdFile.save();
-        console.log("File saved successfully");
-        res.status(200).send({ message: "Success", _id : createdFile._id });
+        res.status(200).send({ message: "Success", _id: createdFile._id });
     } catch (error) {
         console.log(error.message);
         res.status(400).send({ error });
@@ -28,7 +24,7 @@ router.post('/create', userAuth, async function (req, res) {
 });
 
 router.get('/get', userAuth, async function (req, res) {
-    
+
     const allFileData = await User.findById(req.user._id).populate('FileData').exec();
 
     res.status(200).send({ message: allFileData.FileData })
