@@ -40,6 +40,8 @@ const userAuth = async (req, res, next) => {
     next();
 
   } catch (error) {
+    if(error.message.includes('buffering timed out'))
+      return res.status(503).send({ error: "Internal Server Error" });
     return res.status(400).send({ error: checkStringMessage(error.message) });
   }
 };

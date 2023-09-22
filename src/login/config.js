@@ -1,8 +1,8 @@
 
-const appName = "OneLogin";
-const appEmail = "OneLogin";
-const appReplyEmail = "support.onelogin";
-const appDomain = "http://localhost:3001"
+const appName = "MyCloudMate";
+const appEmail = "MyCloudMate";
+const appReplyEmail = "harshit107.in.sharing@gmail.com";
+const appDomain = "mycloudmate.harshit107.online"
 const appVerificationUrl = appDomain + '/users/verification/email/'
 
 module.exports = {
