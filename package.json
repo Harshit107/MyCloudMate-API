@@ -1,5 +1,5 @@
 {
-  "name": "one-login",
+  "name": "my-cloud-mate-api",
   "version": "1.0.0",
   "description": "",
   "main": "app.js",
@@ -12,10 +12,9 @@
   "repository": {
     "type": "git"
   },
-  "keywords": [
-    "login",
-    "register"
-  ],
+  "engines": {
+    "node": ">=14 <15"
+  },
   "author": "Harshit",
   "license": "ISC",
   "dependencies": {
