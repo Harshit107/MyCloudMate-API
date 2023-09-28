@@ -15,7 +15,7 @@ router.post('/create', userAuth, async function (req, res) {
         delete req.body.updatedAt;
         const createdFile = new FileData({ ...req.body, userId: req.user._id });
         await createdFile.save();
-        res.status(200).send({ message: "Success", _id: createdFile._id });
+        res.status(200).send({ message: "Success", file: createdFile });
     } catch (error) {
         console.log(error.message);
         res.status(400).send({ error });
