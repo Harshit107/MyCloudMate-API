@@ -22,6 +22,10 @@ app.use("/project",projectRouter);
 app.use("/file",fileRouter);
 
 app.get("/startserver", (req, res) => res.send("<h1>Server started </h1>"));
-app.get("/checkserver", (req, res) => res.send("<h1>Hey Developer! Server is working fine, Go aHead!</h1>", req.ip));
+app.get("/checkserver", (req, res) =>
+  res.send(
+    `<h1>Hey Developer! Server is working fine, Go aHead! ${req.ip}</h1>`
+  )
+);
 
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

@@ -14,7 +14,7 @@ const userAuth = async (req, res, next) => {
   try {
 
     // return await makeDelay(res);
-
+    
     const authorization = req.header("Authorization");
     if (!authorization || !authorization.startsWith("Bearer "))
       return res.status(401).send({ error: "Authentication required" });
