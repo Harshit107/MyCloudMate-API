@@ -4,6 +4,7 @@ const bcrypt = require("bcrypt");
 const jwt = require('jsonwebtoken');
 const { isPasswordValid } = require("../Helper/Validator");
 const { convertDateToString } = require("../Helper/StringHelper");
+require('dotenv').config();
 
 const userSchema = new mongoose.Schema(
   {
