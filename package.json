@@ -1,5 +1,5 @@
 {
-  "name": "one-login",
+  "name": "my-cloud-mate-api",
   "version": "1.0.0",
   "description": "",
   "main": "app.js",
@@ -11,6 +11,9 @@
   },
   "repository": {
     "type": "git"
+  },
+  "engines": {
+    "node": ">=14 <15"
   },
   "keywords": [
     "MyCouldMate"
