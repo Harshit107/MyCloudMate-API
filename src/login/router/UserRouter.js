@@ -5,7 +5,7 @@ const QRCode = require("../model/QRCode.js");
 const validator = require("../Helper/Validator.js");
 const userAuth = require("../auth/UserAuth.js");
 const { v4: uuidv4 } = require("uuid");
-const {checkStringMessage} = require("../Helper/StringHelper.js");
+const { checkStringMessage } = require("../Helper/StringHelper.js");
 const forgetPasswordTemplate = require("../template/ForgetPasswordTemplate.js");
 const freelyEmail = require("freely-email");
 const {
@@ -75,8 +75,24 @@ router.post("/create", async (req, res) => {
     newUser.lastIP = req.ip
     const token = await newUser.generateToken();
     const userId = newUser._id;
-    const newProject = new ProjectList({projectName : "Default Project", userId : userId});
+    const newProject = new ProjectList({ projectName: "Default Project", userId: userId });
     await newProject.save();
+
+    //send email on registration
+    const temporaryVerificationLink = await createTemporaryVerificationLink(
+      email
+    );
+    const verificationEmailObject = {
+      app: appName,
+      recipient: email,
+      sender: appEmail,
+      replyTo: appReplyEmail,
+      subject: "Email Verification",
+      link: temporaryVerificationLink,
+    };
+    freelyEmail.sendLink(verificationEmailObject)
+    //------------------------------------------
+
     res.status(201).send({
       user: newUser,
       token: token,
@@ -298,6 +314,9 @@ router.post("/logout/device", userAuth, async (req, res) => {
 router.post("/verification/email", async (req, res) => {
   try {
     const { email } = validator.emailValidator(req.body);
+    console.log("incoming email from ", email);
+    return res.send({ message: "Verification email" })
+
     const user = await User.findOne({ email });
     if (!user) throw new Error("User is not registerd with us");
 
@@ -315,9 +334,9 @@ router.post("/verification/email", async (req, res) => {
     };
 
     const emailInfo = await freelyEmail.sendLink(verificationEmailObject);
-    res.status(200).send({ msg: "Email Sent Successfully", emailInfo });
+    res.status(200).send({ message: "Email Sent Successfully", emailInfo });
   } catch (error) {
-    showErrorLog(error);
+    showErrorLog(error.message);
     return res.status(400).send({ error: checkStringMessage(error.message) });
   }
 });
@@ -356,33 +375,79 @@ router.get("/verification/email/:id", async (req, res) => {
 /*                               forget password                              */
 /* -------------------------------------------------------------------------- */
 
+// sending OTP to mail,
+// user enter OTP
+// verify from database
+
+function generateOTP() {
+  const length = 6;
+  let otp = '';
+
+  for (let i = 0; i < length; i++) {
+    otp += Math.floor(Math.random() * 10);
+  }
+
+  return Number(otp);
+}
+
 router.post("/forget", async (req, res) => {
   try {
-    const { email } =
-      { email: "harshit107.in@gmail.com" } ||
-      validator.emailValidator(req.body);
-    showSuccessLog(email);
-    const emailTemplate = forgetPasswordTemplate(
-      "http://localhost:3001/checkserver"
-    );
+    const { email } = validator.emailValidator(req.body);
+    const user = await User.findOne({ email });
+    if (!user)
+      return res.status(404).send({ error: "No user found with this email" })
 
-    const emailResult = await freelyEmail.sendLink({
-      app: "OneLogin",
-      subject: "Forget Password",
+    let otp = generateOTP();
+    const emailResult = await freelyEmail.sendOTP({
+      app: appName,
+      subject: "Forgot password",
       recipient: email,
-      sender: "OneLogin",
-      replyTo: "support@oneLogin.com",
-      link: "214758",
-      HTMLfile: emailTemplate,
+      sender: appEmail,
+      replyTo: appReplyEmail,
+      otp,
     });
-    if (emailResult.data) console.log("Success > ", emailResult.data);
-    else console.log("Error  > ", emailResult.error);
-    res.send("Done");
+
+    if (!emailResult.data) {
+      return res.status(404).send({ error: "Something went wrong while sending OTP"});
+    }
+
+    user.otp = otp;
+    await user.save();
+    res.status(202).send({ message: "OTP sent successfully" });
   } catch (error) {
     console.log(error.message);
-    res.send({error : error.message});
+    res.send({ error: error.message });
   }
 });
+
+
+
+router.post("/verify/otp", async (req, res) => {
+  try {
+
+    const otp = req.body.otp;
+    const email = req.body.email;
+    if(!otp)
+      res.status(400).send({error : "Enter Valid OTP"})
+
+    const user = await User.findOne({ email });
+    if (!user)
+      return res.status(404).send({ error: "User not found" })
+    if(user.otp != otp)
+        return res.status(400).send({error : "Invalid OTP" });
+    
+    user.password = req.body.password;
+    await user.save();
+    res.status(202).send({ message: "Password changed successfully" });
+
+  } catch (error) {
+    console.log(error.message);
+    res.send({ error: error.message });
+  }
+});
+
+
+
 
 /* # # # # # # # # # # # # # #  # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 
@@ -441,9 +506,9 @@ router.get("/profile/token", userAuth, async (req, res) => {
 });
 
 router.post('/users/admin/verify', async (req, res) => {
-  const {email} = req.body;
-  await User.findOneAndUpdate({email: email}, {isVerified: true});
-  res.send({message : "Success!"});
+  const { email } = req.body;
+  await User.findOneAndUpdate({ email: email }, { isVerified: true });
+  res.send({ message: "Success!" });
 
 })
 

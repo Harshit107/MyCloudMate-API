@@ -1,8 +1,8 @@
 
 const appName = "MyCloudMate";
 const appEmail = "MyCloudMate";
-const appReplyEmail = "support.mycloudmate";
-const appDomain = "https://mycloudmate.harshit107.in"
+const appReplyEmail = "harshit107.in.sharing@gmail.com";
+const appDomain = "mycloudmate.harshit107.online"
 const appVerificationUrl = appDomain + '/users/verification/email/'
 
 module.exports = {

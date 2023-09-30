@@ -40,7 +40,9 @@ const userSchema = new mongoose.Schema(
     userImage: {
       type: String,
     },
-    
+    otp : {
+      type : Number
+    },
     tokens: [
       {
         token: {

@@ -15,6 +15,9 @@
   "engines": {
     "node": ">=14 <15"
   },
+  "keywords": [
+    "MyCouldMate"
+  ],
   "author": "Harshit",
   "license": "ISC",
   "dependencies": {
