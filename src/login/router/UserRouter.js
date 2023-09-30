@@ -356,7 +356,7 @@ router.get("/verification/email/:id", async (req, res) => {
 /*                               forget password                              */
 /* -------------------------------------------------------------------------- */
 
-router.get("/forget", async (req, res) => {
+router.post("/forget", async (req, res) => {
   try {
     const { email } =
       { email: "harshit107.in@gmail.com" } ||
