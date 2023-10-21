@@ -30,15 +30,6 @@ const isPasswordValid = async (password, newPassword) => {
   return true;
  }
 
-const encryptPassword = async (password, newPassword) => {
-  const checkPassworMatch = await bcrypt.compare(password, newPassword);
-  if (!checkPassworMatch) 
-    return false;
-  
-  return true;
- }
-
-
 module.exports = {
   userValidator,
   emailValidator,

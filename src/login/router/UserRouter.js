@@ -6,7 +6,6 @@ const validator = require("../Helper/Validator.js");
 const userAuth = require("../auth/UserAuth.js");
 const { v4: uuidv4 } = require("uuid");
 const { checkStringMessage } = require("../Helper/StringHelper.js");
-const forgetPasswordTemplate = require("../template/ForgetPasswordTemplate.js");
 const freelyEmail = require("freely-email");
 const {
   appName,
@@ -15,10 +14,8 @@ const {
   appVerificationUrl,
 } = require("../config.js");
 
-//dev dependencies
 const VerificationLink = require("../model/VerificationLink.js");
 const ProjectList = require("../../modal/ProjectList.js");
-const { default: mongoose } = require("mongoose");
 
 // ===================    Method Area  ======================================
 
@@ -370,7 +367,7 @@ router.get("/verification/email/:id", async (req, res) => {
   }
 });
 
-// ​‌‍‌⁡⁢⁣⁢𝘂𝗻𝗱𝗲𝗰𝗶𝗱𝗲𝗱⁡​
+
 /* -------------------------------------------------------------------------- */
 /*                               forget password                              */
 /* -------------------------------------------------------------------------- */
