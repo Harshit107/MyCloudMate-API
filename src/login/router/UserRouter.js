@@ -377,7 +377,7 @@ router.get("/verification/email/:id", async (req, res) => {
 
 // sending OTP to mail,
 // user enter OTP
-// verify from database
+
 
 function generateOTP() {
   const length = 6;
