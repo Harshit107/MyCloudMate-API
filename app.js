@@ -7,7 +7,7 @@ app.set("trust proxy", 1);
 
 app.use(
   cors({
-    origin: "https://mycloudmate.harshit107.in", // Replace with the actual origin of your frontend application
+    origin: ["https://mycloudmate.harshit107.in","http://localhost:3000"], // Replace with the actual origin of your frontend application
     allowedHeaders: ["Authorization", "Content-Type"], // Add 'Authorization' to the list of allowed headers
   })
 );
