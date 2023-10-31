@@ -3,17 +3,17 @@ const User = require("../model/User.js");
 require("dotenv").config();
 const checkStringMessage = require("../Helper/StringHelper.js");
 
-async function makeDelay(res) {
-  const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-  await delay(3000);
-  // return res.status(400).send({message : "success"});
-  return res.status(200).send({ error: "success" });
+const getIpAddress = (req) => {
+    const IP = req.headers['cf-connecting-ip'] ||
+            req.headers['x-real-ip'] ||
+            req.headers['x-forwarded-for'] ||
+            req.socket.remoteAddress ||
+            req.ip;
+    return IP;
 }
 
 const userAuth = async (req, res, next) => {
   try {
-
-    // return await makeDelay(res);
     
     const authorization = req.header("Authorization");
     if (!authorization || !authorization.startsWith("Bearer "))
@@ -32,7 +32,7 @@ const userAuth = async (req, res, next) => {
       return res.status(403).send({ error: "Email is Not Verified" });
 
     if (!req.url.includes('logout')) {
-      user.updateToken(token, req.ip)
+      user.updateToken(token, getIpAddress(req))
     }
     req.user = user;
     req.token = token;
