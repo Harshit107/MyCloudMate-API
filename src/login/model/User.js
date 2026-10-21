@@ -1,10 +1,10 @@
 const mongoose = require("mongoose");
 const validator = require("validator");
 const bcrypt = require("bcrypt");
-const jwt = require('jsonwebtoken');
+const jwt = require("jsonwebtoken");
 const { isPasswordValid } = require("../Helper/Validator");
-const { convertDateToString } = require("../Helper/StringHelper");
-require('dotenv').config();
+const { convertDateToString } = require("../../utils/dateHelper");
+require("dotenv").config();
 
 const userSchema = new mongoose.Schema(
   {
@@ -40,8 +40,8 @@ const userSchema = new mongoose.Schema(
     userImage: {
       type: String,
     },
-    otp : {
-      type : Number
+    otp: {
+      type: Number,
     },
     tokens: [
       {
@@ -49,42 +49,59 @@ const userSchema = new mongoose.Schema(
           required: true,
           type: String,
         },
-        "Login_date": {
+        Login_date: {
           type: String,
         },
-        "Last_used": {
+        Last_used: {
           type: String,
         },
         IP: {
-          type: String
+          type: String,
         },
         lastIP: {
-          type: String
+          type: String,
         },
-
       },
     ],
-
   },
   {
     timestamps: true,
   }
 );
 
-userSchema.virtual('files', {
-  ref: 'FileData',
-  localField: '_id',
-  foreignField: 'userId'
-})
+userSchema.virtual("files", {
+  ref: "FileData",
+  localField: "_id",
+  foreignField: "userId",
+});
+
+userSchema.virtual("FileData", {
+  ref: "FileData",
+  localField: "_id",
+  foreignField: "userId",
+});
+
+// Configure JSON serialization to include virtuals and securely remove sensitive fields
+userSchema.set("toJSON", {
+  virtuals: true,
+  transform: (doc, ret) => {
+    delete ret.password;
+    delete ret.tokens;
+    delete ret.otp;
+    return ret;
+  },
+});
+
+userSchema.set("toObject", { virtuals: true });
 
 userSchema.methods.toJSON = function () {
-  const user = this
+  const user = this;
   const userObject = user.toObject();
-
   delete userObject.password;
-  delete userObject.tokens
-  return userObject
-}
+  delete userObject.tokens;
+  delete userObject.otp;
+  return userObject;
+};
 
 userSchema.pre("save", async function (next) {
   const user = this;
@@ -96,8 +113,9 @@ userSchema.pre("save", async function (next) {
 
 userSchema.statics.findByCredentails = async (email, password) => {
   const user = await User.findOne({ email });
-  if (!user)
+  if (!user) {
     throw new Error("Invalid email or password");
+  }
 
   const checkPassworMatch = await isPasswordValid(password, user.password);
   if (!checkPassworMatch) {
@@ -112,14 +130,16 @@ userSchema.methods.generateToken = async function () {
     {
       _id: user._id.toString(),
     },
-    process.env.JWT
+    process.env.JWT || "thisisaauthrequestfromserver"
   );
+
+  const nowFormatted = convertDateToString(Date.now());
   user.tokens = user.tokens.concat({
     token,
-    "Login_date": convertDateToString(Date.now()),
-    "Last_used " : convertDateToString(Date.now()),
-    IP: user.ip,
-    lastIP: user.lastIP,
+    Login_date: nowFormatted,
+    Last_used: nowFormatted,
+    IP: user.ip || "127.0.0.1",
+    lastIP: user.lastIP || user.ip || "127.0.0.1",
   });
   await user.save();
   return token;
@@ -127,31 +147,16 @@ userSchema.methods.generateToken = async function () {
 
 userSchema.methods.updateToken = async function (token, lastIP) {
   const user = this;
-  // console.log(user.tokens);
-  user.tokens.forEach(t => {
+  user.tokens.forEach((t) => {
     if (t.token === token) {
-      t["Last_used"] = convertDateToString(Date.now());
-      t.lastIP = lastIP
+      t.Last_used = convertDateToString(Date.now());
+      if (lastIP) {
+        t.lastIP = lastIP;
+      }
     }
   });
   await user.save();
-
 };
-
-userSchema.set('toJSON', {virtuals : true});
-userSchema.set('toObject', {virtuals : true});
-userSchema.methods.toJSON = function () {
-  const user = this;
-  const userObject = user.toObject();
-  return userObject;
-};
-
-userSchema.virtual('FileData',  {
-  ref : 'FileData',
-  localField : '_id',
-  foreignField : 'userId'
-})
-
 
 const User = mongoose.model("User", userSchema);
 module.exports = User;

@@ -1,26 +1,28 @@
 {
   "name": "my-cloud-mate-api",
   "version": "1.0.0",
-  "description": "",
+  "description": "MyCloudMate REST API Backend",
   "main": "app.js",
   "scripts": {
     "dev": "nodemon app.js",
     "prod": "node app.js",
     "dev-node": "node --watch app.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node --test tests/*.test.js"
   },
   "repository": {
     "type": "git"
   },
   "engines": {
-    "node": ">=14 <15"
+    "node": ">=18.0.0"
   },
   "keywords": [
-    "MyCouldMate"
+    "MyCloudMate"
   ],
   "author": "Harshit",
   "license": "ISC",
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1154.0",
+    "@aws-sdk/s3-request-presigner": "^3.1154.0",
     "bcrypt": "^5.1.0",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
