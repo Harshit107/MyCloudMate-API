@@ -14,6 +14,12 @@ function escapeHtml(str) {
     .replace(/'/g, "&#039;");
 }
 
+function sanitizeUrl(url) {
+  if (!url) return "#";
+  const clean = String(url).trim().replace(/[\r\n]/g, "");
+  return clean.replace(/"/g, "%22").replace(/'/g, "%27").replace(/</g, "%3C").replace(/>/g, "%3E");
+}
+
 /**
  * Generate a responsive, dark-mode email template for shared files
  * @param {object} params
@@ -38,7 +44,7 @@ function getFileShareEmailTemplate({
   const safeFileSize = escapeHtml(fileSize);
   const safeSenderName = escapeHtml(senderName);
   const safeCustomMessage = escapeHtml(customMessage);
-  const safeDownloadUrl = escapeHtml(downloadUrl);
+  const safeDownloadUrl = sanitizeUrl(downloadUrl);
 
   const customMessageBlock = safeCustomMessage
     ? `

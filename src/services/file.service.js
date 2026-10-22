@@ -93,16 +93,18 @@ class FileService {
     if (fileId) {
       const file = await FileData.findOne({ _id: fileId, userId: user._id, isDeleted: false });
       if (file) {
-        targetName = targetName || file.name;
-        targetType = targetType !== "file" ? targetType : (file.type || "file");
-        targetSize = targetSize !== "N/A" ? targetSize : (file.size || "N/A");
-        targetLink = targetLink || file.downloadUrl;
+        targetName = file.name || targetName;
+        targetType = file.type || targetType;
+        targetSize = file.size || targetSize;
+        targetLink = file.downloadUrl || targetLink;
       }
     }
 
     if (!targetLink) {
       throw AppError.badRequest("A valid download link or file ID is required", "MISSING_DOWNLOAD_LINK");
     }
+
+    console.log(`[FileShare] User "${user.email}" sharing "${targetName}" (link: ${targetLink}) with "${normalizedRecipient}"`);
 
     const htmlContent = getFileShareEmailTemplate({
       fileName: targetName || "Shared File",
