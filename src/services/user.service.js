@@ -3,7 +3,10 @@ const QRCode = require("../login/model/QRCode");
 const VerificationLink = require("../login/model/VerificationLink");
 const ProjectList = require("../modal/ProjectList");
 const { v4: uuidv4 } = require("uuid");
-const freelyEmail = require("freely-email");
+const freelyEmailModule = require("freely-email");
+const freelyEmail = freelyEmailModule.FreelyEmailClient
+  ? new freelyEmailModule.FreelyEmailClient()
+  : freelyEmailModule;
 const AppError = require("../utils/appError");
 const {
   appName,
@@ -69,10 +72,16 @@ class UserService {
         subject: "Email Verification",
         link: temporaryVerificationLink,
       };
-      // Send link asynchronously (doesn't block response)
-      freelyEmail.sendLink(verificationEmailObject).catch((err) => {
-        console.error("Failed to send verification email:", err.message);
-      });
+      // Send link asynchronously (doesn't block response and won't fail registration if email provider fails)
+      try {
+        if (freelyEmail && typeof freelyEmail.sendLink === "function") {
+          freelyEmail.sendLink(verificationEmailObject).catch((err) => {
+            console.error("Failed to send verification email:", err.message);
+          });
+        }
+      } catch (emailErr) {
+        console.error("Failed to initiate verification email:", emailErr.message);
+      }
     } catch (err) {
       // Cleanup partially created user if subsequent critical steps fail
       await User.findByIdAndDelete(newUser._id);

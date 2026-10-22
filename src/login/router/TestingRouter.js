@@ -1,6 +1,9 @@
 const express = require("express");
 const router = new express.Router();
-const fe = require("freely-email");
+const freelyEmailModule = require("freely-email");
+const fe = freelyEmailModule.FreelyEmailClient
+  ? new freelyEmailModule.FreelyEmailClient()
+  : freelyEmailModule;
 
 router.get("/testing", async (req, res) => {
   const msgBody = {
