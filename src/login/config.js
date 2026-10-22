@@ -1,20 +1,22 @@
+const DOMAINS = require("../config/domain");
+
 const appName = "MyCloudMate";
 const appEmail = "MyCloudMate";
-const appReplyEmail = "contact@harshit107.online";
-const appDomain = process.env.APP_DOMAIN || "mycloudmate.harshit107.online";
+const appReplyEmail = DOMAINS.EMAIL.CONTACT_EMAIL;
+const appDomain = process.env.APP_DOMAIN || DOMAINS.CLOUD_MATE.APP_DOMAIN;
 
 const isProduction = process.env.NODE_ENV === "production";
 const apiBaseUrl =
   process.env.API_BASE_URL ||
   (isProduction
-    ? "https://mycloudmate.api.harshit107.online"
+    ? DOMAINS.CLOUD_MATE.API
     : `http://localhost:${process.env.PORT || 3001}`);
 
 const appVerificationUrl =
   process.env.APP_VERIFICATION_URL || `${apiBaseUrl}/users/verification/email/`;
 
 const frontendAuthUrl =
-  process.env.FRONTEND_AUTH_URL || "https://mycloudmate.harshit107.online/auth";
+  process.env.FRONTEND_AUTH_URL || `${DOMAINS.CLOUD_MATE.UI}/auth`;
 
 module.exports = {
   appName,
@@ -24,4 +26,5 @@ module.exports = {
   appDomain,
   apiBaseUrl,
   frontendAuthUrl,
+  DOMAINS,
 };

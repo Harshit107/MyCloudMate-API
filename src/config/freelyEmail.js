@@ -1,8 +1,9 @@
 const freelyEmailModule = require("freely-email");
+const DOMAINS = require("./domain");
 
 const FREELY_EMAIL_BASE_URL =
   process.env.FREELY_EMAIL_BASE_URL ||
-  "https://freelyemail-api.harshit107.online/api/v1/emails/";
+  DOMAINS.EMAIL.API_V1_EMAILS;
 
 const freelyEmail = freelyEmailModule.FreelyEmailClient
   ? new freelyEmailModule.FreelyEmailClient({ baseURL: FREELY_EMAIL_BASE_URL })

@@ -3,6 +3,8 @@ const cors = require("cors");
 const errorHandler = require("./src/middlewares/error.middleware");
 const ApiResponse = require("./src/utils/apiResponse");
 
+const DOMAINS = require("./src/config/domain");
+
 const app = express();
 const PORT = process.env.PORT || 3001;
 
@@ -11,9 +13,10 @@ app.set("trust proxy", 1);
 app.use(
   cors({
     origin: [
-      "https://mycloudmate.harshit107.online",
-      "https://mycloudmate.harshit107.in",
+      DOMAINS.CLOUD_MATE.UI,
+      DOMAINS.ONE_LOGIN.UI,
       "http://localhost:3000",
+      "http://localhost:5173",
     ],
     allowedHeaders: ["Authorization", "Content-Type"],
   })
