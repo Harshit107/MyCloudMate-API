@@ -65,6 +65,24 @@ class FileController {
 
     return ApiResponse.success(res, "File deleted successfully", result, 200);
   });
+
+  /**
+   * POST /file/share
+   */
+  static shareFile = asyncHandler(async (req, res) => {
+    const { recipient, fileId, fileName, fileType, fileSize, link, customMessage } = req.body;
+    const result = await FileService.shareFileViaEmail(req.user, {
+      recipient,
+      fileId,
+      fileName,
+      fileType,
+      fileSize,
+      link,
+      customMessage,
+    });
+
+    return ApiResponse.success(res, "File shared successfully via email", result, 200);
+  });
 }
 
 module.exports = FileController;

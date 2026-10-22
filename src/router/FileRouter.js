@@ -8,5 +8,6 @@ router.post("/presigned-url", userAuth, FileController.getPresignedUrl);
 router.post("/create", userAuth, FileController.createFile);
 router.get("/get", userAuth, FileController.getFiles);
 router.post("/delete", userAuth, FileController.deleteFile);
+router.post("/share", userAuth, FileController.shareFile);
 
 module.exports = router;

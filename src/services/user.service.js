@@ -3,13 +3,7 @@ const QRCode = require("../login/model/QRCode");
 const VerificationLink = require("../login/model/VerificationLink");
 const ProjectList = require("../modal/ProjectList");
 const { v4: uuidv4 } = require("uuid");
-const freelyEmailModule = require("freely-email");
-const FREELY_EMAIL_BASE_URL =
-  process.env.FREELY_EMAIL_BASE_URL ||
-  "https://freelyemail-api.harshit107.online/api/v1/emails/";
-const freelyEmail = freelyEmailModule.FreelyEmailClient
-  ? new freelyEmailModule.FreelyEmailClient({ baseURL: FREELY_EMAIL_BASE_URL })
-  : freelyEmailModule;
+const freelyEmail = require("../config/freelyEmail");
 const AppError = require("../utils/appError");
 const {
   appName,
@@ -72,8 +66,9 @@ class UserService {
         recipient: email,
         sender: appEmail,
         replyTo: appReplyEmail,
-        subject: "Email Verification",
+        subject: "Verify your email - MyCloudMate",
         link: temporaryVerificationLink,
+        withValidTime: 60,
       };
       // Send link asynchronously (doesn't block response and won't fail registration if email provider fails)
       try {
@@ -231,8 +226,9 @@ class UserService {
       recipient: email,
       sender: appEmail,
       replyTo: appReplyEmail,
-      subject: "Email Verification",
+      subject: "Verify your email - MyCloudMate",
       link: temporaryVerificationLink,
+      withValidTime: 60,
     };
 
     const emailInfo = await freelyEmail.sendLink(verificationEmailObject);
@@ -272,11 +268,12 @@ class UserService {
     const otp = this.generateOTP();
     const emailResult = await freelyEmail.sendOTP({
       app: appName,
-      subject: "Forgot password OTP",
+      subject: "Reset your password OTP - MyCloudMate",
       recipient: email,
       sender: appEmail,
       replyTo: appReplyEmail,
-      otp,
+      otp: String(otp),
+      withValidTime: 10,
     });
 
     if (!emailResult || !emailResult.data) {

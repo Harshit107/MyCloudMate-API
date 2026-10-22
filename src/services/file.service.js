@@ -1,6 +1,10 @@
 const FileData = require("../modal/FileData");
 const ProjectList = require("../modal/ProjectList");
 const AppError = require("../utils/appError");
+const freelyEmail = require("../config/freelyEmail");
+const { appName, appEmail, appReplyEmail } = require("../login/config");
+const { getFileShareEmailTemplate } = require("../utils/emailTemplate");
+const { validateEmail } = require("../utils/validator");
 
 class FileService {
   /**
@@ -63,6 +67,70 @@ class FileService {
       fileId: file._id,
       name: file.name,
       isDeleted: true,
+    };
+  }
+
+  /**
+   * Share file via email with recipient
+   * @param {object} user - Authenticated user object
+   * @param {object} params
+   * @param {string} params.recipient - Target email
+   * @param {string} [params.fileId] - File ID
+   * @param {string} [params.fileName] - Fallback name
+   * @param {string} [params.fileType] - Fallback type
+   * @param {string} [params.fileSize] - Fallback size
+   * @param {string} [params.link] - Direct download link
+   * @param {string} [params.customMessage] - Optional message
+   */
+  static async shareFileViaEmail(user, { recipient, fileId, fileName, fileType, fileSize, link, customMessage }) {
+    const { email: normalizedRecipient } = validateEmail({ email: recipient });
+
+    let targetName = fileName;
+    let targetType = fileType || "file";
+    let targetSize = fileSize || "N/A";
+    let targetLink = link;
+
+    if (fileId) {
+      const file = await FileData.findOne({ _id: fileId, userId: user._id, isDeleted: false });
+      if (file) {
+        targetName = targetName || file.name;
+        targetType = targetType !== "file" ? targetType : (file.type || "file");
+        targetSize = targetSize !== "N/A" ? targetSize : (file.size || "N/A");
+        targetLink = targetLink || file.downloadUrl;
+      }
+    }
+
+    if (!targetLink) {
+      throw AppError.badRequest("A valid download link or file ID is required", "MISSING_DOWNLOAD_LINK");
+    }
+
+    const htmlContent = getFileShareEmailTemplate({
+      fileName: targetName || "Shared File",
+      fileType: targetType,
+      fileSize: targetSize,
+      downloadUrl: targetLink,
+      senderName: user.name || user.email,
+      customMessage,
+    });
+
+    const emailResult = await freelyEmail.sendEmail({
+      app: appName,
+      sender: appEmail,
+      replyTo: appReplyEmail,
+      recipient: normalizedRecipient,
+      subject: `[MyCloudMate] ${user.name || "A user"} shared "${targetName || "a file"}" with you`,
+      message: `A file has been shared with you on MyCloudMate:\nFile Name: ${targetName}\nSize: ${targetSize}\nDownload Link: ${targetLink}`,
+      HTMLfile: htmlContent,
+    });
+
+    if (!emailResult || !emailResult.data) {
+      throw AppError.internal("Failed to dispatch share email, please try again", "EMAIL_DISPATCH_FAILED");
+    }
+
+    return {
+      recipient: normalizedRecipient,
+      fileName: targetName,
+      messageId: emailResult.data?.messageId,
     };
   }
 }
