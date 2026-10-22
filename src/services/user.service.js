@@ -4,8 +4,11 @@ const VerificationLink = require("../login/model/VerificationLink");
 const ProjectList = require("../modal/ProjectList");
 const { v4: uuidv4 } = require("uuid");
 const freelyEmailModule = require("freely-email");
+const FREELY_EMAIL_BASE_URL =
+  process.env.FREELY_EMAIL_BASE_URL ||
+  "https://freelyemail-api.harshit107.online/api/v1/emails/";
 const freelyEmail = freelyEmailModule.FreelyEmailClient
-  ? new freelyEmailModule.FreelyEmailClient()
+  ? new freelyEmailModule.FreelyEmailClient({ baseURL: FREELY_EMAIL_BASE_URL })
   : freelyEmailModule;
 const AppError = require("../utils/appError");
 const {
