@@ -1,48 +1,61 @@
 const jwt = require("jsonwebtoken");
 const User = require("../model/User.js");
+const ApiResponse = require("../../utils/apiResponse");
 require("dotenv").config();
-const checkStringMessage = require("../Helper/StringHelper.js");
 
 const getIpAddress = (req) => {
-    const IP = req.headers['cf-connecting-ip'] ||
-            req.headers['x-real-ip'] ||
-            req.headers['x-forwarded-for'] ||
-            req.socket.remoteAddress ||
-            req.ip;
-    return IP;
-}
+  const IP =
+    req.headers["cf-connecting-ip"] ||
+    req.headers["x-real-ip"] ||
+    req.headers["x-forwarded-for"] ||
+    req.socket.remoteAddress ||
+    req.ip;
+  return IP;
+};
 
 const userAuth = async (req, res, next) => {
   try {
-    
     const authorization = req.header("Authorization");
-    if (!authorization || !authorization.startsWith("Bearer "))
-      return res.status(401).send({ error: "Authentication required" });
+    if (!authorization || !authorization.startsWith("Bearer ")) {
+      return ApiResponse.error(res, "Authentication required", "UNAUTHORIZED", 401);
+    }
 
-    const token = req.header("Authorization").replace("Bearer ", "");
+    const token = authorization.replace("Bearer ", "").trim();
+    if (!token) {
+      return ApiResponse.error(res, "Authentication required", "UNAUTHORIZED", 401);
+    }
 
-    const decode = jwt.verify(token, process.env.JWT);
+    let decode;
+    try {
+      decode = jwt.verify(token, process.env.JWT || "thisisaauthrequestfromserver");
+    } catch (jwtErr) {
+      const code = jwtErr.name === "TokenExpiredError" ? "TOKEN_EXPIRED" : "INVALID_TOKEN";
+      return ApiResponse.error(res, "Device token expired or invalid", code, 401);
+    }
+
     const user = await User.findOne({ _id: decode._id, "tokens.token": token });
 
-
-    if (!user)
-      return res.status(401).send({ error: "Authentication Required" });
-
-    if (!user.isVerified)
-      return res.status(403).send({ error: "Email is Not Verified" });
-
-    if (!req.url.includes('logout')) {
-      user.updateToken(token, getIpAddress(req))
+    if (!user) {
+      return ApiResponse.error(res, "Authentication required or session revoked", "UNAUTHORIZED", 401);
     }
+
+    if (!user.isVerified) {
+      return ApiResponse.error(res, "Email is not verified", "FORBIDDEN", 403);
+    }
+
+    if (!req.url.includes("logout")) {
+      user.updateToken(token, getIpAddress(req));
+    }
+
     req.user = user;
     req.token = token;
-
     next();
-
   } catch (error) {
-    if(error.message.includes('buffering timed out'))
-      return res.status(503).send({ error: "Internal Server Error" });
-    return res.status(400).send({ error: checkStringMessage(error.message) });
+    if (error.message && error.message.includes("buffering timed out")) {
+      return ApiResponse.error(res, "Database connection timeout", "DATABASE_TIMEOUT", 503);
+    }
+    return ApiResponse.error(res, error.message || "Authentication failed", "UNAUTHORIZED", 401);
   }
 };
+
 module.exports = userAuth;
