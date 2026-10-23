@@ -10,17 +10,39 @@ const PORT = process.env.PORT || 3001;
 
 app.set("trust proxy", 1);
 
+const allowedOrigins = [
+  DOMAINS.CLOUD_MATE.UI,
+  DOMAINS.ONE_LOGIN.UI,
+  "https://mycloudmate.harshit107.online",
+  "http://mycloudmate.harshit107.online",
+  "https://mycloudmate.harshit107.in",
+  "http://mycloudmate.harshit107.in",
+  "https://account.harshit107.online",
+  "http://localhost:3000",
+  "http://localhost:3001",
+  "http://localhost:5173",
+];
+
 app.use(
   cors({
-    origin: [
-      DOMAINS.CLOUD_MATE.UI,
-      DOMAINS.ONE_LOGIN.UI,
-      "http://localhost:3000",
-      "http://localhost:5173",
-    ],
-    allowedHeaders: ["Authorization", "Content-Type"],
+    origin: function (origin, callback) {
+      if (!origin) return callback(null, true);
+      const isAllowed =
+        allowedOrigins.includes(origin) ||
+        origin.endsWith(".harshit107.online") ||
+        origin.endsWith(".harshit107.in");
+      if (isAllowed) {
+        return callback(null, true);
+      }
+      return callback(null, true);
+    },
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Authorization", "Content-Type", "X-Requested-With", "Accept", "Origin"],
+    exposedHeaders: ["Authorization"],
   })
 );
+app.options("*", cors());
 app.use(express.json());
 
 // Initialize Database connection
