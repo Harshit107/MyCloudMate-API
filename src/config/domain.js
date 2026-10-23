@@ -29,7 +29,7 @@ const DOMAINS = Object.freeze({
 
   // MyCloudMate Cloud Vault Platform
   CLOUD_MATE: Object.freeze({
-    API: "https://mycloudmate.api.harshit107.online",
+    API: "https://mycloudmate-api.harshit107.online",
     UI: "https://mycloudmate.harshit107.online",
     APP_DOMAIN: "mycloudmate.harshit107.online",
   }),
