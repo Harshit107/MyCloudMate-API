@@ -58,10 +58,18 @@ app.use("/project", projectRouter);
 app.use("/file", fileRouter);
 
 // Health check endpoints
-app.get("/startserver", (req, res) => res.send("<h1>Server started</h1>"));
-app.get("/checkserver", (req, res) =>
-  res.send(`<h1>Hey Developer! Server is working fine, Go aHead! ${req.ip}</h1>`)
-);
+app.get(["/startserver", "/startServer"], (req, res) => {
+  if (req.headers.accept && req.headers.accept.includes("application/json")) {
+    return res.json({ status: "online", server: "MyCloudMate API", message: "Server started", uptime: process.uptime() });
+  }
+  res.send("<h1>Server started</h1>");
+});
+app.get(["/checkserver", "/checkServer"], (req, res) => {
+  if (req.headers.accept && req.headers.accept.includes("application/json")) {
+    return res.json({ status: "online", server: "MyCloudMate API", message: "Hey Developer! Server is working fine, Go aHead!", ip: req.ip, uptime: process.uptime() });
+  }
+  res.send(`<h1>Hey Developer! Server is working fine, Go aHead! ${req.ip}</h1>`);
+});
 
 // Catch-all 404 handler for undefined routes
 app.use((req, res) => {
